@@ -1,5 +1,5 @@
-require("dotenv").config();
-const postgres = require("postgres");
+require('dotenv').config()
+const postgres = require('postgres')
 
 // connect to db
 const connect = postgres({
@@ -8,6 +8,6 @@ const connect = postgres({
   database: process.env.DB_NAME,
   username: process.env.DB_USER,
   password: process.env.DB_PASS, // gunakan password kalian masing-masing
-});
+})
 
-module.exports = connect;
+module.exports = connect
