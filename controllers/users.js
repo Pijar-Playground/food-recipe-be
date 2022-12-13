@@ -1,4 +1,8 @@
 const accouts = require('../models/accouts')
+const { v4: uuidv4 } = require('uuid')
+const path = require('path')
+const helper = require('../helper')
+const sharp = require('sharp')
 
 const getUsers = async (req, res) => {
   try {
@@ -55,14 +59,47 @@ const postUsers = async (req, res) => {
       throw { code: 401, message: 'Email sudah terdaftar' }
     }
 
-    // INSERT INTO account (id, name, email, password, phone, photo) VALUES ("bilkis")
-    const addToDb = await accouts.addNewUsers({ name, email, phone, password })
+    // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
+    let file = req.files.photo
+    let fileName = `${uuidv4()}-${file.name}`
+    let uploadPath = `${path.dirname(require.main.filename)}/public/${fileName}`
+    let mimeType = file.mimetype.split('/')[1]
+    let allowFile = ['jpeg', 'jpg', 'png', 'webp']
 
-    res.json({
-      status: true,
-      message: 'berhasil di tambah',
-      data: addToDb,
-    })
+    // validate size image
+    if (file.size > 1048576) {
+      throw 'File terlalu besar, max 1mb'
+    }
+
+    if (allowFile.find((item) => item === mimeType)) {
+      // Use the mv() method to place the file somewhere on your server
+      file.mv(uploadPath, async function (err) {
+        // await sharp(file).jpeg({ quality: 20 }).toFile(uploadPath)
+
+        if (err) {
+          throw 'Upload foto gagal'
+        }
+
+        const addToDb = await accouts.addNewUsers({
+          name,
+          email,
+          phone,
+          password,
+          photo: `/images/${fileName}`,
+        })
+
+        res.json({
+          status: true,
+          message: 'berhasil di tambah',
+          data: addToDb,
+          // path: uploadPath,
+        })
+      })
+    } else {
+      throw 'Upload foto gagal, hanya menerima format photo'
+    }
+
+    // INSERT INTO account (id, name, email, password, phone, photo) VALUES ("bilkis")
   } catch (error) {
     res.status(error?.code ?? 500).json({
       status: false,

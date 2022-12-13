@@ -6,7 +6,7 @@ const userController = require('../controllers/users')
 router.get('/:id?', userController.getUsers)
 
 // CREATE
-router.post('/add', validateCreate, userController.postUsers)
+router.post('/add', userController.postUsers)
 
 // UPDATE
 // "/data/update/:indexs" <--- paramter data
