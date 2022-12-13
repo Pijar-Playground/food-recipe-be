@@ -1,8 +1,6 @@
 const accouts = require('../models/accouts')
 const { v4: uuidv4 } = require('uuid')
 const path = require('path')
-const helper = require('../helper')
-const sharp = require('sharp')
 
 const getUsers = async (req, res) => {
   try {
