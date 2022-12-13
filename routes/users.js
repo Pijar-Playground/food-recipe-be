@@ -1,9 +1,7 @@
 const router = require('express').Router()
 const { validateCreate } = require('../middlewares/validation')
 const userController = require('../controllers/users')
-const cloudinary = require('../cloudinary')
-const { v4: uuidv4 } = require('uuid')
-const path = require('path')
+const upload = require('../middlewares/upload')
 
 // READ
 // /data/:id? <-- optional parameter
@@ -13,20 +11,10 @@ router.get('/:id?', userController.getUsers)
 router.post('/add', validateCreate, userController.postUsers)
 
 // Upload
-router.post('/upload', (req, res) => {
-  let file = req.files.photo
-  let fileName = `${uuidv4()}-${file.name}`
-  let uploadPath = `${path.dirname(require.main.filename)}/public/${fileName}`
+router.post('/upload', upload, (req, res) => {
+  console.log(req.body)
 
-  file.mv(uploadPath, async function (err) {
-    cloudinary.v2.uploader.upload(
-      uploadPath,
-      { public_id: uuidv4() },
-      function (error, result) {
-        res.json(result)
-      }
-    )
-  })
+  res.send('test')
 })
 
 // UPDATE
