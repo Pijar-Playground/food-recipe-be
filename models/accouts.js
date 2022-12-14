@@ -30,7 +30,7 @@ const getUserByEmail = async (params) => {
   const { email } = params
 
   return await db`
-      SELECT email FROM account WHERE email = ${email}
+      SELECT * FROM account WHERE email = ${email}
     `
 }
 
@@ -40,7 +40,7 @@ const addNewUsers = async (params) => {
 
   return await db`
       INSERT INTO account (name, email, password, phone, photo) 
-      VALUES (${name}, ${email}, ${phone}, ${password}, ${photo})
+      VALUES (${name}, ${email}, ${password}, ${phone}, ${photo})
     `
 }
 

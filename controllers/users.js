@@ -1,11 +1,12 @@
 const accouts = require('../models/accouts')
 const { v4: uuidv4 } = require('uuid')
 const path = require('path')
-const helper = require('../helper')
-const sharp = require('sharp')
+const bcrypt = require('bcrypt')
+const saltRounds = 10
 
 const getUsers = async (req, res) => {
   try {
+    console.log(req.headers)
     const { id } = req.params // /data/:id
     const { page, limit, sort } = req.query // ?page=1&limit=5
 
@@ -80,19 +81,26 @@ const postUsers = async (req, res) => {
           throw 'Upload foto gagal'
         }
 
-        const addToDb = await accouts.addNewUsers({
-          name,
-          email,
-          phone,
-          password,
-          photo: `/images/${fileName}`,
-        })
+        bcrypt.hash(password, saltRounds, async (err, hash) => {
+          if (err) {
+            throw 'Proses authentikasi gagal, silahkan coba lagi'
+          }
 
-        res.json({
-          status: true,
-          message: 'berhasil di tambah',
-          data: addToDb,
-          // path: uploadPath,
+          // Store hash in your password DB.
+          const addToDb = await accouts.addNewUsers({
+            name,
+            email,
+            phone,
+            password: hash,
+            photo: `/images/${fileName}`,
+          })
+
+          res.json({
+            status: true,
+            message: 'berhasil di tambah',
+            data: addToDb,
+            // path: uploadPath,
+          })
         })
       })
     } else {

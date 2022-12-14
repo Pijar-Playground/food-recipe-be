@@ -68,4 +68,23 @@ const validateUpdate = (req, res, next) => {
   })
 }
 
-module.exports = { validateCreate, validateUpdate }
+const validateLogin = (req, res, next) => {
+  const rules = new Validator(req.body, {
+    email: 'required|email',
+    password: 'required',
+  })
+
+  rules.check().then(function (success) {
+    if (success) {
+      next()
+    } else {
+      res.status(400).json({
+        status: false,
+        message: rules.errors,
+        data: [],
+      })
+    }
+  })
+}
+
+module.exports = { validateCreate, validateUpdate, validateLogin }

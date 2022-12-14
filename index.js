@@ -8,6 +8,7 @@ const fileUpload = require('express-fileupload')
 const path = require('path')
 const port = 3000
 const userRoutes = require('./routes/users')
+const authRoutes = require('./routes/auth')
 
 // 1. MMVC = MIDDLEWARE MODEL VIEW CONTROLLER
 // 2. Security = Sanitasi / validation, basic security
@@ -40,6 +41,9 @@ app.use('/images', express.static(path.join(__dirname, 'public')))
 
 // register users route
 app.use('/users', userRoutes)
+
+// register auth route
+app.use('/auth', authRoutes)
 
 // aku menjalankan express pada port variable diatas
 app.listen(port, () => {
