@@ -1,3 +1,5 @@
+const cloudinary = require('cloudinary')
+
 function formatBytes(bytes, decimals = 2) {
   if (!+bytes) return '0 Bytes'
 
@@ -10,4 +12,10 @@ function formatBytes(bytes, decimals = 2) {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
 }
 
-module.exports = { formatBytes }
+cloudinary.config({
+  cloud_name: 'dunn0czwh',
+  api_key: '887785185143842',
+  api_secret: 'Dq229-FaBdkWEgYuOHCA9PtmZgg',
+})
+
+module.exports = { formatBytes, cloudinary }

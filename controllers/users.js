@@ -1,17 +1,22 @@
 const accouts = require('../models/accouts')
 const { v4: uuidv4 } = require('uuid')
-const path = require('path')
 const bcrypt = require('bcrypt')
 const saltRounds = 10
+const { connect } = require('../middlewares/redis')
+const { cloudinary } = require('../helper')
 
 const getUsers = async (req, res) => {
   try {
-    console.log(req.headers)
     const { id } = req.params // /data/:id
     const { page, limit, sort } = req.query // ?page=1&limit=5
 
     if (id) {
       const getSelectedUser = await accouts.getUserById({ id })
+
+      // store data to redis for 10 seconds
+      connect.set('url', req.originalUrl, 'ex', 10) // string only
+      connect.set('data', JSON.stringify(getSelectedUser), 'ex', 10) // string only
+      connect.set('is_paginate', null, 'ex', 10) // string only
 
       res.status(200).json({
         status: true,
@@ -23,10 +28,18 @@ const getUsers = async (req, res) => {
       let getAllUser
 
       if (limit && page) {
-        getAllUser = await accouts.getAllUsersPagination({ limit, page })
+        getAllUser = await accouts.getAllUsersPagination({ limit, page, sort })
       } else {
         getAllUser = await accouts.getAllUsers({ sort })
       }
+
+      // store data to redis for 10 seconds
+      connect.set('url', req.originalUrl, 'ex', 10) // string only
+      connect.set('data', JSON.stringify(getAllUser), 'ex', 10) // string only
+      connect.set('total', getAllUser?.length, 'ex', 10) // string only
+      connect.set('limit', limit, 'ex', 10) // string only
+      connect.set('page', page, 'ex', 10) // string only
+      connect.set('is_paginate', 'true', 'ex', 10) // string only
 
       if (getAllUser.length > 0) {
         res.status(200).json({
@@ -62,8 +75,8 @@ const postUsers = async (req, res) => {
 
     // The name of the input field (i.e. "sampleFile") is used to retrieve the uploaded file
     let file = req.files.photo
-    let fileName = `${uuidv4()}-${file.name}`
-    let uploadPath = `${path.dirname(require.main.filename)}/public/${fileName}`
+    // let fileName = `${uuidv4()}-${file.name}`
+    // let uploadPath = `${path.dirname(require.main.filename)}/public/${fileName}`
     let mimeType = file.mimetype.split('/')[1]
     let allowFile = ['jpeg', 'jpg', 'png', 'webp']
 
@@ -73,36 +86,37 @@ const postUsers = async (req, res) => {
     }
 
     if (allowFile.find((item) => item === mimeType)) {
-      // Use the mv() method to place the file somewhere on your server
-      file.mv(uploadPath, async function (err) {
-        // await sharp(file).jpeg({ quality: 20 }).toFile(uploadPath)
-
-        if (err) {
-          throw 'Upload foto gagal'
-        }
-
-        bcrypt.hash(password, saltRounds, async (err, hash) => {
-          if (err) {
-            throw 'Proses authentikasi gagal, silahkan coba lagi'
+      cloudinary.v2.uploader.upload(
+        file.tempFilePath,
+        { public_id: uuidv4() },
+        function (error, result) {
+          if (error) {
+            throw 'Upload foto gagal'
           }
 
-          // Store hash in your password DB.
-          const addToDb = await accouts.addNewUsers({
-            name,
-            email,
-            phone,
-            password: hash,
-            photo: `/images/${fileName}`,
-          })
+          bcrypt.hash(password, saltRounds, async (err, hash) => {
+            if (err) {
+              throw 'Proses authentikasi gagal, silahkan coba lagi'
+            }
 
-          res.json({
-            status: true,
-            message: 'berhasil di tambah',
-            data: addToDb,
-            // path: uploadPath,
+            // Store hash in your password DB.
+            const addToDb = await accouts.addNewUsers({
+              name,
+              email,
+              phone,
+              password: hash,
+              photo: result.url,
+            })
+
+            res.json({
+              status: true,
+              message: 'berhasil di tambah',
+              data: addToDb,
+              // path: uploadPath,
+            })
           })
-        })
-      })
+        }
+      )
     } else {
       throw 'Upload foto gagal, hanya menerima format photo'
     }

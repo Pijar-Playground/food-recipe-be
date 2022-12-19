@@ -2,9 +2,11 @@ const router = require('express').Router()
 const { validateCreate } = require('../middlewares/validation')
 const { validateToken } = require('../middlewares/webtoken')
 const userController = require('../controllers/users')
+const { useRedis } = require('../middlewares/redis')
+
 // READ
 // /data/:id? <-- optional parameter
-router.get('/:id?', validateToken, userController.getUsers)
+router.get('/:id?', validateToken, useRedis, userController.getUsers)
 
 // CREATE
 router.post('/add', validateCreate, userController.postUsers)

@@ -14,9 +14,9 @@ const validateToken = (req, res, next) => {
             throw { code: 401, message: 'Token error, please try again!' }
           }
 
-          if (Date.now() >= decoded.exp) {
-            throw { code: 401, message: 'Token expired' }
-          }
+          // if (Date.now() >= decoded.exp) {
+          //   throw { code: 401, message: 'Token expired' }
+          // }
 
           next()
         }

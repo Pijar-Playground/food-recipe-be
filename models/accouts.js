@@ -2,7 +2,7 @@ const db = require('../db') // import dari file ./db.js
 
 // Get all users with pagination
 const getAllUsersPagination = async (params) => {
-  const { limit, page } = params
+  const { limit, page, sort } = params
 
   return await db`SELECT * FROM account ${
     sort ? db`ORDER BY id DESC` : db`ORDER BY id ASC`
