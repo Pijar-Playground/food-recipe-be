@@ -13,9 +13,9 @@ function formatBytes(bytes, decimals = 2) {
 }
 
 cloudinary.config({
-  cloud_name: 'dunn0czwh',
-  api_key: '887785185143842',
-  api_secret: 'Dq229-FaBdkWEgYuOHCA9PtmZgg',
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_KEY,
+  api_secret: process.env.CLOUD_SECRET,
 })
 
 module.exports = { formatBytes, cloudinary }
