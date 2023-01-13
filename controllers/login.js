@@ -11,7 +11,7 @@ const login = async (req, res) => {
 
     // kalo check email isinya tidak ada
     if (checkEmail?.length === 0) {
-      throw 'Email tidak terdaftar'
+      throw { code: 401, message: 'Email tidak terdaftar' }
     }
 
     bcrypt.compare(password, checkEmail[0].password, (err, result) => {
@@ -37,6 +37,7 @@ const login = async (req, res) => {
             message: 'login berhasil',
             data: {
               token,
+              profile: checkEmail[0],
             },
           })
         } else {

@@ -15,6 +15,7 @@ const useRedis = async (req, res, next) => {
     const limit = await connect.get('limit')
     const page = await connect.get('page')
     const url = await connect.get('url')
+    const pagination_all = await connect.get('pagination_all')
     const urlMatch = url === req.originalUrl
 
     if (urlMatch && data) {
@@ -27,6 +28,7 @@ const useRedis = async (req, res, next) => {
           page: page,
           limit: limit,
           data: JSON.parse(data),
+          pagination_all: pagination_all,
         })
       } else {
         res.status(200).json({
